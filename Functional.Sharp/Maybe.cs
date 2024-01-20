@@ -5,60 +5,27 @@ namespace Functional.Sharp;
 [PublicAPI]
 public readonly struct Maybe<T>
 {
-    private readonly T _value;
+    private readonly T? _value;
+    public readonly bool HasValue;
 
-    private Maybe(T val)
-    {
-        _value = val;
-        HasValue = true;
-    }
+    private Maybe(T? value, bool hasValue)
+        => (_value, HasValue) = (value, hasValue);
 
-    public static Maybe<T> Parse(T? value)
-        => value is not null ? Some(value) : None;
+    public static Maybe<T> Of(T value)
+        => new (value, value is not null);
+
+    public Maybe<TResult> Map<TResult>(Func<T, TResult> mapper)
+        => _value is null ? Maybe<TResult>.None() : Maybe<TResult>.Of(mapper(_value));
+
+    public T OrElse(T defaultValue)
+        => HasValue ? _value! : defaultValue;
+
+    public static Maybe<T> None()
+        => new (default, false);
 
     public static Maybe<T> Parse<TNullable>(TNullable? value)
         where TNullable : struct
-        => value.HasValue ? Some((T)(object)value.Value) : None;
-
-
-    public static Maybe<T> Some(T value)
-    {
-        if (value == null)
-            throw new ArgumentNullException(nameof(value));
-
-        return new Maybe<T>(value);
-    }
-
-    public static Maybe<T> None => new();
-
-    public T Value
-    {
-        get
-        {
-            if (!HasValue)
-                throw new InvalidOperationException("Maybe does not have a value");
-
-            return _value;
-        }
-    }
-
-    public bool HasValue { get; }
-
-    public static Maybe<TOut> FromMaybe<TIn, TOut>(
-        Maybe<TIn> input,
-        Func<TIn, TOut> converter)
-        => input.HasValue ? Maybe<TOut>.Some(converter(input.Value)) : Maybe<TOut>.None;
-
-    public static Maybe<TOut> FromMaybe<TIn, TOut>(
-        Maybe<TIn> input,
-        Func<TIn, Maybe<TOut>> converter)
-    {
-        var val = input.HasValue ? converter(input.Value) : default;
-        return val.HasValue ? Maybe<TOut>.Some(val.Value) : Maybe<TOut>.None;
-    }
-
-    public T? GetValueOrDefault(T? defaultValue)
-        => HasValue ? _value : defaultValue;
+        => value.HasValue ? Of((T)(object)value.Value) : None();
 
     public override bool Equals(object? obj)
         => obj switch
@@ -66,19 +33,12 @@ public readonly struct Maybe<T>
             Maybe<T> other => Equals(_value, other._value),
             _ => false
         };
-
-
+    
     public bool Equals(T? val)
-        => HasValue && (val?.Equals(Value) ?? false);
+        => _value is not null && (val?.Equals(_value) ?? false);
 
     public override int GetHashCode()
         => _value?.GetHashCode() ?? 0;
-
-    public static bool operator ==(Maybe<T> maybe, T value)
-        => maybe.Value != null && maybe.HasValue && maybe.Value.Equals(value);
-
-    public static bool operator !=(Maybe<T> maybe, T value)
-        => maybe.Value != null && maybe.HasValue && !maybe.Value.Equals(value);
 
     public static bool operator ==(Maybe<T> first, Maybe<T> second)
         => first.Equals(second);
