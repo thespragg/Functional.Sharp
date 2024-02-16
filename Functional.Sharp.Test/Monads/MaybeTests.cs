@@ -1,4 +1,6 @@
-namespace Functional.Sharp.Test;
+using Functional.Sharp.Monads;
+
+namespace Functional.Sharp.Test.Monads;
 
 public class MaybeTests
 {
@@ -75,6 +77,23 @@ public class MaybeTests
     }
     
     [Fact]
+    public void Equals_ShouldNotEquateOtherTypes()
+    {
+        var maybe = Maybe<int>.Of(1);
+        // ReSharper disable once SuspiciousTypeConversion.Global
+        var eq = maybe.Equals("1");
+        Assert.False(eq);
+    }
+    
+    [Fact]
+    public void Equals_ShouldEquateAValue()
+    {
+        var maybe = Maybe<int>.Of(1);
+        var eq = maybe.Equals(1);
+        Assert.True(eq);
+    }
+    
+    [Fact]
     public void GetHashCode_ShouldReturnValueHashCode()
     {
         const int val = 100;
@@ -111,6 +130,4 @@ public class MaybeTests
         maybe = Maybe<int>.Parse(val);
         Assert.False(maybe.HasValue);
     }
-    
-    private record TestRecord();
 }

@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace Functional.Sharp;
+namespace Functional.Sharp.Monads;
 
 [PublicAPI]
 public readonly struct Maybe<T>
