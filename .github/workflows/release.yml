@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [main]
     types: [closed]
+  workflow_dispatch:
 
 env:
   NUGET_ENABLE_LEGACY_CSPROJ_PACK: true
