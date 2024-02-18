@@ -20,6 +20,9 @@ public readonly struct Maybe<T>
     public T OrElse(T defaultValue)
         => HasValue ? _value! : defaultValue;
 
+    public T UnwrapOrThrow()
+        => HasValue ? _value! : throw new NullReferenceException("Maybe did not contain a value to unwrap.");
+    
     public static Maybe<T> None()
         => new (default, false);
 
@@ -44,4 +47,7 @@ public readonly struct Maybe<T>
         => first.Equals(second);
 
     public static bool operator !=(Maybe<T> first, Maybe<T> second) => !(first == second);
+    
+    public static implicit operator Maybe<T>(T? value) 
+        => value is null ? Of(value!) : None();
 }
