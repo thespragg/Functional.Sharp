@@ -20,6 +20,15 @@ public class TryTests
     }
 
     [Fact]
+    public void Execute_ShouldExecuteFinally()
+    {
+        var finallyExecuted = false;
+        var sut = Try.Execute(() => 5, onFinally: () => finallyExecuted = true);
+        Assert.Equal(5, sut.OrElse(-1));
+        Assert.True(finallyExecuted);
+    }
+    
+    [Fact]
     public void Execute_ShouldReturnMappedError()
     {
         var sut = Try.Execute<int>(
@@ -54,6 +63,15 @@ public class TryTests
     {
         var sut = await Try.ExecuteAsync<int>(() => throw new Exception("Failed"));
         Assert.Equal(-1, sut.OrElse(-1));
+    }
+    
+    [Fact]
+    public async void ExecuteAsync_ShouldHandleAsyncFinally()
+    {
+        var finallyExecuted = false;
+        var sut = await Try.ExecuteAsync(() => Task.FromResult(5), onFinally: () => finallyExecuted = true);
+        Assert.Equal(5, sut.OrElse(-1));
+        Assert.True(finallyExecuted);
     }
     
     [Fact]

@@ -9,8 +9,8 @@ public static class Try
 
     private static Result<T> ExecuteCore<T>(
         Func<T> func,
-        Func<Exception, Error>? exceptionMapper = null
-    )
+        Func<Exception, Error>? exceptionMapper = null,
+        Action? onFinally = null)
     {
         exceptionMapper ??= DefaultExceptionMapper;
         try
@@ -21,11 +21,16 @@ public static class Try
         {
             return Result<T>.Failure(exceptionMapper(ex));
         }
+        finally
+        {
+            onFinally?.Invoke();
+        }
     }
 
     private static async Task<Result<TResult>> ExecuteCoreAsync<TResult>(
         Func<Task<TResult>> func,
-        Func<Exception, Error>? exceptionMapper = null
+        Func<Exception, Error>? exceptionMapper = null,
+        Action? onFinally = null
     )
     {
         exceptionMapper ??= DefaultExceptionMapper;
@@ -37,33 +42,47 @@ public static class Try
         {
             return Result<TResult>.Failure(exceptionMapper(ex));
         }
+        finally
+        {
+            onFinally?.Invoke();
+        }
     }
 
     public static bool Execute(
         Action func,
-        Func<Exception, Error>? exceptionMapper = null
+        Func<Exception, Error>? exceptionMapper = null,
+        Action? onFinally = null
     ) => ExecuteCore(() =>
-    {
-        func();
-        return true;
-    }, exceptionMapper).OrElse(false);
+        {
+            func();
+            return true;
+        },
+        exceptionMapper,
+        onFinally
+    ).OrElse(false);
 
     public static Result<TResult> Execute<TResult>(
         Func<TResult> func,
-        Func<Exception, Error>? exceptionMapper = null
-    ) => ExecuteCore(func, exceptionMapper);
+        Func<Exception, Error>? exceptionMapper = null,
+        Action? onFinally = null
+    ) => ExecuteCore(func, exceptionMapper, onFinally);
 
     public static async Task<Result<TResult>> ExecuteAsync<TResult>(
         Func<Task<TResult>> func,
-        Func<Exception, Error>? exceptionMapper = null
-    ) => await ExecuteCoreAsync(func, exceptionMapper);
+        Func<Exception, Error>? exceptionMapper = null,
+        Action? onFinally = null
+    ) => await ExecuteCoreAsync(func, exceptionMapper, onFinally);
 
     public static async Task<bool> ExecuteAsync(
         Func<Task> func,
-        Func<Exception, Error>? exceptionMapper = null
+        Func<Exception, Error>? exceptionMapper = null,
+        Action? onFinally = null
     ) => (await ExecuteCoreAsync(async () =>
-    {
-        await func();
-        return true;
-    }, exceptionMapper)).OrElse(false);
+        {
+            await func();
+            return true;
+        },
+        exceptionMapper,
+        onFinally
+    )).OrElse(false);
 }
