@@ -12,19 +12,25 @@ public readonly struct Maybe<T>
         => (_value, HasValue) = (value, hasValue);
 
     public static Maybe<T> Of(T value)
-        => new (value, value is not null);
+        => new(value, value is not null);
 
     public Maybe<TResult> Map<TResult>(Func<T, TResult> mapper)
-        => _value is null ? Maybe<TResult>.None() : Maybe<TResult>.Of(mapper(_value));
+        => _value is null
+            ? Maybe<TResult>.None()
+            : Maybe<TResult>.Of(mapper(_value));
 
     public T OrElse(T defaultValue)
         => HasValue ? _value! : defaultValue;
 
-    public T UnwrapOrThrow()
-        => HasValue ? _value! : throw new NullReferenceException("Maybe did not contain a value to unwrap.");
-    
+    public TResult Match<TResult>(
+        Func<T, TResult> hasValue,
+        Func<TResult> hasNone
+    ) => HasValue 
+        ? hasValue(_value!) 
+        : hasNone();
+
     public static Maybe<T> None()
-        => new (default, false);
+        => new(default, false);
 
     public static Maybe<T> Parse<TNullable>(TNullable? value)
         where TNullable : struct
@@ -36,7 +42,7 @@ public readonly struct Maybe<T>
             Maybe<T> other => Equals(_value, other._value),
             _ => false
         };
-    
+
     public bool Equals(T? val)
         => _value is not null && (val?.Equals(_value) ?? false);
 
@@ -47,7 +53,7 @@ public readonly struct Maybe<T>
         => first.Equals(second);
 
     public static bool operator !=(Maybe<T> first, Maybe<T> second) => !(first == second);
-    
-    public static implicit operator Maybe<T>(T? value) 
+
+    public static implicit operator Maybe<T>(T? value)
         => value is null ? Of(value!) : None();
 }
