@@ -20,14 +20,11 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    - name: Restore dependencies
-      run: dotnet restore ./Functional.Sharp/Functional.Sharp.csproj
-
     - name: Build
-      run: dotnet build --configuration Release --no-restore ./Functional.Sharp/Functional.Sharp.csproj
+      run: dotnet build --configuration Release ./Functional.Sharp/Functional.Sharp.csproj
 
     - name: Test 
-      run: dotnet test --no-restore --verbosity normal
+      run: dotnet test --verbosity normal
 
     - name: Pack
       run: dotnet pack --configuration Release --no-build --output nupkgs ./Functional.Sharp/Functional.Sharp.csproj
