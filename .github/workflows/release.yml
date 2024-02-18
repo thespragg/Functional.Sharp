@@ -1,7 +1,10 @@
 name: Publish, and release Functional.Sharp
 
 on:
-   pull_request:
+  push:
+    branches:
+      - main 
+  pull_request:
     branches: [main]
     types: [closed]
   workflow_dispatch:
