@@ -1,45 +1,33 @@
 name: Publish, and release Functional.Sharp
 
 on:
-  pull_request:
+   pull_request:
     branches: [main]
     types: [closed]
   workflow_dispatch:
 
-env:
-  NUGET_ENABLE_LEGACY_CSPROJ_PACK: true
-
 jobs:
-  build-and-test:
-    uses: ./.github/workflows/build.yml
-
-  release:
-    needs: [build-and-test]
+  build:
     runs-on: ubuntu-latest
-    env:
-      BUILD_CONFIG: "Release"
-      SOLUTION: "Functional.Sharp.sln"
-      GH_TOKEN: ${{ github.token }}
 
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '8.0.x'
 
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1
-        with:
-          nuget-version: "latest"
+    - name: Restore dependencies
+      run: dotnet restore ./Functional.Sharp/Functional.Sharp.csproj
 
-      - name: Setup .NET Core SDK 8.0.x
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 8.0.x
+    - name: Build
+      run: dotnet build --configuration Release --no-restore ./Functional.Sharp/Functional.Sharp.csproj
 
-      - name: Install dependencies
-        run: dotnet restore -r linux-x64
+    - name: Test 
+      run: dotnet test --no-restore --verbosity normal
 
-      - name: Pack
-        run: nuget pack Functional.Sharp/Functional.Sharp.csproj -IncludeReferencedProjects -Properties Configuration=Release -OutputDirectory . -Symbols -SymbolPackageFormat snupkg
+    - name: Pack
+      run: dotnet pack --configuration Release --no-build --output nupkgs ./Functional.Sharp/Functional.Sharp.csproj
 
-      - name: Push
-        run: |
-          dotnet nuget push Functional.Sharp.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_TOKEN }}
+    - name: Push to NuGet
+      run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json
