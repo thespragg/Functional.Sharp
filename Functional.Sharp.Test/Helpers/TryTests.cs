@@ -1,5 +1,6 @@
 using Functional.Sharp.Errors;
 using Functional.Sharp.Helpers;
+using Functional.Sharp.Monads;
 
 namespace Functional.Sharp.Test.Helpers;
 
@@ -85,5 +86,59 @@ public class TryTests
         Assert.True(sut);
         sut = await Try.ExecuteAsync(() => throw new Exception("Failed"));
         Assert.False(sut);
+    }
+    
+    [Fact]
+    public void Execute_ShouldHandleNestedResult()
+    {
+        var sut = Try.Execute(() => Result<int>.Success(1));
+        Assert.Equal(1, sut.OrElse(-1));
+    }
+    
+    [Fact]
+    public void Execute_ShouldHandleNestedResult_Error()
+    {
+        var sut = Try.Execute(() => Result<int>.Failure(new DatabaseError("Database error")));
+        sut.Match(
+            success => throw new Exception("Wrong branch."),
+            err => Assert.Equal(typeof(DatabaseError), err.GetType())
+        );
+    }
+    
+    [Fact]
+    public void Execute_ShouldHandleNestedResult_Exception()
+    {
+        var sut = Try.Execute<Result<int>>(() => throw new Exception("Database Error"), ex => new DatabaseError(ex.Message));
+        sut.Match(
+            success => throw new Exception("Wrong branch."),
+            err => Assert.Equal(typeof(DatabaseError), err.GetType())
+        );
+    }
+    
+    [Fact]
+    public async Task ExecuteAsync_ShouldHandleNestedResult_Error()
+    {
+        var sut = await Try.ExecuteAsync(async () => await Task.FromResult(Result<int>.Failure(new DatabaseError("Database error"))));
+        sut.Match(
+            success => throw new Exception("Wrong branch."),
+            err => Assert.Equal(typeof(DatabaseError), err.GetType())
+        );
+    }
+    
+    [Fact]
+    public async Task ExecuteAsync_ShouldHandleNestedResult()
+    {
+        var sut = await Try.ExecuteAsync(async () => await Task.FromResult(Result<int>.Success(1)));
+        Assert.Equal(1, sut.OrElse(-1));
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ShouldHandleNestedResult_Exception()
+    {
+        var sut = await Try.ExecuteAsync<Result<int>>(() => throw new Exception("Database Error"), ex => new DatabaseError(ex.Message));
+        sut.Match(
+            success => throw new Exception("Wrong branch."),
+            err => Assert.Equal(typeof(DatabaseError), err.GetType())
+        );
     }
 }

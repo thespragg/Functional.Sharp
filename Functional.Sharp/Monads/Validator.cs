@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Functional.Sharp.Monads;
 
 public static class Validator
@@ -10,7 +14,7 @@ public class Validator<T>
     private IEnumerable<(Func<T, bool>, string)> Predicates { get; }
 
     internal Validator()
-        => Predicates = [];
+        => Predicates = Enumerable.Empty<(Func<T, bool>, string)>();
 
     private Validator(
         IEnumerable<(Func<T, bool>, string)> predicates

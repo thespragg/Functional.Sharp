@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Functional.Sharp.Errors;
 using Functional.Sharp.Monads;
 
@@ -67,11 +69,31 @@ public static class Try
         Action? onFinally = null
     ) => ExecuteCore(func, exceptionMapper, onFinally);
 
+    public static Result<TResult> Execute<TResult>(
+        Func<Result<TResult>> func,
+        Func<Exception, Error>? exceptionMapper = null,
+        Action? onFinally = null
+    ) => ExecuteCore(func, exceptionMapper, onFinally)
+        .Match(
+            success => success,
+            err => err
+        );
+
     public static async Task<Result<TResult>> ExecuteAsync<TResult>(
         Func<Task<TResult>> func,
         Func<Exception, Error>? exceptionMapper = null,
         Action? onFinally = null
     ) => await ExecuteCoreAsync(func, exceptionMapper, onFinally);
+
+    public static async Task<Result<TResult>> ExecuteAsync<TResult>(
+        Func<Task<Result<TResult>>> func,
+        Func<Exception, Error>? exceptionMapper = null,
+        Action? onFinally = null
+    ) => (await ExecuteCoreAsync(func, exceptionMapper, onFinally))
+        .Match(
+            success => success,
+            err => err
+        );
 
     public static async Task<bool> ExecuteAsync(
         Func<Task> func,

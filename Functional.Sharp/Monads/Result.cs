@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Functional.Sharp.Errors;
 using JetBrains.Annotations;
 
@@ -32,7 +34,7 @@ public class Result<TValue>
         Action<Error> error
     )
     {
-        if(_isSuccess) success(_value!);
+        if (_isSuccess) success(_value!);
         else error(_error!);
     }
 
@@ -41,13 +43,13 @@ public class Result<TValue>
 
     public Result<T> Map<T>(Func<TValue, T> mapper)
         => _isSuccess ? Result<T>.Success(mapper(_value!)) : Result<T>.Failure(_error!);
-    
+
     public async Task<Result<T>> MapAsync<T>(Func<TValue, Task<T>> mapper)
         => _isSuccess ? Result<T>.Success(await mapper(_value!)) : Result<T>.Failure(_error!);
 
-    public static implicit operator Result<TValue>(TValue value) 
+    public static implicit operator Result<TValue>(TValue value)
         => new(value);
 
-    public static implicit operator Result<TValue>(Error error) 
+    public static implicit operator Result<TValue>(Error error)
         => new(error);
 }
