@@ -42,10 +42,20 @@ public class Result<TValue>
         => _isSuccess ? _value! : defaultValue;
 
     public Result<T> Map<T>(Func<TValue, T> mapper)
-        => _isSuccess ? Result<T>.Success(mapper(_value!)) : Result<T>.Failure(_error!);
+        => _isSuccess ? mapper(_value!) : _error!;
 
     public async Task<Result<T>> MapAsync<T>(Func<TValue, Task<T>> mapper)
-        => _isSuccess ? Result<T>.Success(await mapper(_value!)) : Result<T>.Failure(_error!);
+        => _isSuccess ? await mapper(_value!) : _error!;
+
+    public Result<T> Map<T>(Func<TValue, Result<T>> mapper)
+        => _isSuccess
+            ? mapper(_value!).Match<Result<T>>(success => success, err => err)
+            : _error!;
+
+    public async Task<Result<T>> MapAsync<T>(Func<TValue, Task<Result<T>>> mapper)
+        => _isSuccess
+            ? (await mapper(_value!)).Match<Result<T>>(success => success, err => err)
+            : _error!;
 
     public static implicit operator Result<TValue>(TValue value)
         => new(value);

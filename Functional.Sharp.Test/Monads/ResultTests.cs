@@ -35,7 +35,7 @@ public class ResultTests
         );
         Assert.Equal(100, matchedRes);
     }
-    
+
     [Fact]
     public void MatchedFailure_MatchesCorrectBranch()
     {
@@ -54,7 +54,7 @@ public class ResultTests
         var matchedRes = sut.OrElse(-1);
         Assert.Equal(100, matchedRes);
     }
-    
+
     [Fact]
     public void OrElse_ReturnsElse_WhenFailure()
     {
@@ -71,7 +71,7 @@ public class ResultTests
         Assert.Equal(100.0, mappedResult.OrElse(-1));
         Assert.Equal(typeof(double), mappedResult.OrElse(-1).GetType());
     }
-    
+
     [Fact]
     public void Map_ReturnsMappedFailedResult()
     {
@@ -90,11 +90,49 @@ public class ResultTests
         Result<int> sut = 100;
         Assert.Equal(100, sut.OrElse(-1));
     }
-    
+
     [Fact]
     public void Implicit_WorksForFailure()
     {
         Result<int> sut = new Error("Failed");
         Assert.Equal(-1, sut.OrElse(-1));
+    }
+
+    [Fact]
+    public void Result_MapReturnsFlatResult()
+    {
+        Result<int> result = 1;
+        var sut = result.Map(Result<int>.Success);
+        Assert.Equal(1, sut.OrElse(-1));
+    }
+
+    [Fact]
+    public void Result_MapReturnsFlatResult_Error()
+    {
+        Result<int> result = 1;
+        var sut = result.Map(x => Result<int>.Failure(new DatabaseError("Database error")));
+        sut.Match(
+            success => throw new Exception("Wrong branch."),
+            err => Assert.Equal(typeof(DatabaseError), err.GetType())
+        );
+    }
+    
+    [Fact]
+    public async Task Result_MapAsyncReturnsFlatResult()
+    {
+        Result<int> result = 1;
+        var sut = await result.MapAsync(x => Task.FromResult(Result<int>.Success(x)));
+        Assert.Equal(1, sut.OrElse(-1));
+    }
+
+    [Fact]
+    public async Task Result_MapAsyncReturnsFlatResult_Error()
+    {
+        Result<int> result = 1;
+        var sut = await result.MapAsync(x => Task.FromResult(Result<int>.Failure(new DatabaseError("Database error"))));
+        sut.Match(
+            success => throw new Exception("Wrong branch."),
+            err => Assert.Equal(typeof(DatabaseError), err.GetType())
+        );
     }
 }
