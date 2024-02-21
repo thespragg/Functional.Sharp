@@ -41,6 +41,9 @@ public class Result<TValue>
 
     public Result<T> Map<T>(Func<TValue, T> mapper)
         => _isSuccess ? Result<T>.Success(mapper(_value!)) : Result<T>.Failure(_error!);
+    
+    public async Task<Result<T>> MapAsync<T>(Func<TValue, Task<T>> mapper)
+        => _isSuccess ? Result<T>.Success(await mapper(_value!)) : Result<T>.Failure(_error!);
 
     public static implicit operator Result<TValue>(TValue value) 
         => new(value);
