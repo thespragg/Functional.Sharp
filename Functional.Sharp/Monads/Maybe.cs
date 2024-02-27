@@ -32,7 +32,7 @@ public readonly struct Maybe<T>
     public static Maybe<T> None
         => new(default, false);
 
-    public static Maybe<T> Parse<TNullable>(TNullable? value)
+    public static Maybe<T> From<TNullable>(TNullable? value)
         where TNullable : struct
         => value.HasValue ? Of((T)(object)value.Value) : None;
 
