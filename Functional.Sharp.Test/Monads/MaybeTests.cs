@@ -122,12 +122,12 @@ public class MaybeTests
     public void Parse_ReturnsCorrectObjects_Value()
     {
         int? val = 10;
-        var maybe = Maybe<int>.Parse(val);
+        var maybe = Maybe<int>.From(val);
         Assert.True(maybe.HasValue);
         Assert.Equal(val, maybe.OrElse(-1));
         
         val = null;
-        maybe = Maybe<int>.Parse(val);
+        maybe = Maybe<int>.From(val);
         Assert.False(maybe.HasValue);
     }
 }
