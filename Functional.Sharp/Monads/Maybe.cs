@@ -16,7 +16,7 @@ public readonly struct Maybe<T>
 
     public Maybe<TResult> Map<TResult>(Func<T, TResult> mapper)
         => _value is null
-            ? Maybe<TResult>.None()
+            ? Maybe<TResult>.None
             : Maybe<TResult>.Of(mapper(_value));
 
     public T OrElse(T defaultValue)
@@ -29,12 +29,12 @@ public readonly struct Maybe<T>
         ? hasValue(_value!) 
         : hasNone();
 
-    public static Maybe<T> None()
+    public static Maybe<T> None
         => new(default, false);
 
     public static Maybe<T> Parse<TNullable>(TNullable? value)
         where TNullable : struct
-        => value.HasValue ? Of((T)(object)value.Value) : None();
+        => value.HasValue ? Of((T)(object)value.Value) : None;
 
     public override bool Equals(object? obj)
         => obj switch
@@ -55,5 +55,5 @@ public readonly struct Maybe<T>
     public static bool operator !=(Maybe<T> first, Maybe<T> second) => !(first == second);
 
     public static implicit operator Maybe<T>(T? value)
-        => value is null ? Of(value!) : None();
+        => value is not null ? Of(value) : None;
 }

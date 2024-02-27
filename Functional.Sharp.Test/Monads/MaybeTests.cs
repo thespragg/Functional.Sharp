@@ -15,7 +15,7 @@ public class MaybeTests
     [Fact]
     public void CreatingMaybe_ShouldReturnCorrectValue_None()
     {
-        var maybe = Maybe<int>.None();
+        var maybe = Maybe<int>.None;
         Assert.False(maybe.HasValue);
     }
 
@@ -47,7 +47,7 @@ public class MaybeTests
     [Fact]
     public void GetValueOrDefault_ReturnsDefault_WhenNoValue()
     {
-        var maybe = Maybe<int>.None();
+        var maybe = Maybe<int>.None;
         var val = maybe.OrElse(-1);
         Assert.Equal(-1, val);
     }
