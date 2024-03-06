@@ -46,14 +46,14 @@ public class Result<TValue>
         if (_isSuccess) func(_value!);
     }
 
-    public async Task OnFailureAsync(Func<TValue, Task> func)
+    public async Task OnFailureAsync(Func<Error, Task> func)
     {
-        if (!_isSuccess) await func(_value!);
+        if (!_isSuccess) await func(_error!);
     }
 
-    public void OnFailure(Action<TValue> func)
+    public void OnFailure(Action<Error> func)
     {
-        if (!_isSuccess) func(_value!);
+        if (!_isSuccess) func(_error!);
     }
 
     public TValue OrElse(TValue defaultValue)
