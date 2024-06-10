@@ -31,7 +31,7 @@ public class Result<TValue>
         Func<TValue, Task<T>> success,
         Func<Error, T> error
     ) => _isSuccess ? await success(_value!) : error(_error!);
-
+    
     public void Match(
         Action<TValue> success,
         Action<Error> error
