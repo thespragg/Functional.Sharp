@@ -13,9 +13,8 @@ public static class ResultExtensions
         ArgumentNullException.ThrowIfNull(result);
         ArgumentNullException.ThrowIfNull(next);
 
-        return await result.MatchAsync<Result<TNext>>(
-            async value => await next(value),
-            error => error
+        return await result.MapAsync(
+            async value => await next(value)
         );
     }
 
@@ -26,12 +25,12 @@ public static class ResultExtensions
     {
         var result = await task;
 
-        return await result.MatchAsync<Result<TNext>>(
+        return await result.MatchAsync(
             async value => await success(value),
-            error => failure(error)
+            failure
         );
     }
-    
+  
     public static async Task<Result<TValue>> OnSuccessAsync<TValue>(
         this Task<Result<TValue>> task,
         Func<TValue, Task> onSuccess)
@@ -39,7 +38,7 @@ public static class ResultExtensions
         var result = await task;
         return await result.OnSuccessAsync(onSuccess);
     }
-    
+  
     public static async Task<Result<TValue>> OnFailureAsync<TValue>(
         this Task<Result<TValue>> task,
         Func<Error, Task> onFailure)
