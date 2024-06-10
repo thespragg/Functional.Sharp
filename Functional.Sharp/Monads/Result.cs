@@ -27,6 +27,11 @@ public class Result<TValue>
         Func<Error, T> error
     ) => _isSuccess ? success(_value!) : error(_error!);
 
+    public async Task<T> MatchAsync<T>(
+        Func<TValue, Task<T>> success,
+        Func<Error, T> error
+    ) => _isSuccess ? await success(_value!) : error(_error!);
+
     public void Match(
         Action<TValue> success,
         Action<Error> error
@@ -36,24 +41,37 @@ public class Result<TValue>
         else error(_error!);
     }
 
-    public async Task OnSuccessAsync(Func<TValue, Task> func)
+    public async Task MatchAsync(
+        Func<TValue, Task> success,
+        Action<Error> error
+    )
+    {
+        if (_isSuccess) await success(_value!);
+        else error(_error!);
+    }
+
+    public async Task<Result<TValue>> OnSuccessAsync(Func<TValue, Task> func)
     {
         if (_isSuccess) await func(_value!);
+        return this;
     }
 
-    public void OnSuccess(Action<TValue> func)
+    public Result<TValue> OnSuccess(Action<TValue> func)
     {
         if (_isSuccess) func(_value!);
+        return this;
     }
 
-    public async Task OnFailureAsync(Func<Error, Task> func)
+    public async Task<Result<TValue>> OnFailureAsync(Func<Error, Task> func)
     {
         if (!_isSuccess) await func(_error!);
+        return this;
     }
 
-    public void OnFailure(Action<Error> func)
+    public Result<TValue> OnFailure(Action<Error> func)
     {
         if (!_isSuccess) func(_error!);
+        return this;
     }
 
     public TValue OrElse(TValue defaultValue)
