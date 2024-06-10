@@ -30,7 +30,7 @@ public static class ResultExtensions
             failure
         );
     }
-  
+
     public static async Task<Result<TValue>> OnSuccessAsync<TValue>(
         this Task<Result<TValue>> task,
         Func<TValue, Task> onSuccess)
@@ -38,7 +38,7 @@ public static class ResultExtensions
         var result = await task;
         return await result.OnSuccessAsync(onSuccess);
     }
-  
+
     public static async Task<Result<TValue>> OnFailureAsync<TValue>(
         this Task<Result<TValue>> task,
         Func<Error, Task> onFailure)
@@ -46,4 +46,17 @@ public static class ResultExtensions
         var result = await task;
         return await result.OnFailureAsync(onFailure);
     }
+
+    public static Result<T> Flatten<T>(this Result<Result<T>> result)
+        => result.Match(
+            success => success.Map(v => v),
+            failure => failure
+        );
+
+    public static async Task<Result<T>> FlattenAsync<T>(
+        this Task<Result<Result<T>>> result
+    ) => (await result).Match(
+        success => success.Map(v => v),
+        failure => failure
+    );
 }

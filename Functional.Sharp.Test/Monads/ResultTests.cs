@@ -1,4 +1,5 @@
 using Functional.Sharp.Errors;
+using Functional.Sharp.Extensions;
 using Functional.Sharp.Monads;
 
 namespace Functional.Sharp.Test.Monads;
