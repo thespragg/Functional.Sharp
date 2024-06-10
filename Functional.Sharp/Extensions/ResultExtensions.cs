@@ -30,7 +30,7 @@ public static class ResultExtensions
             failure
         );
     }
-
+  
     public static async Task<Result<TValue>> OnSuccessAsync<TValue>(
         this Task<Result<TValue>> task,
         Func<TValue, Task> onSuccess)
@@ -38,7 +38,7 @@ public static class ResultExtensions
         var result = await task;
         return await result.OnSuccessAsync(onSuccess);
     }
-
+  
     public static async Task<Result<TValue>> OnFailureAsync<TValue>(
         this Task<Result<TValue>> task,
         Func<Error, Task> onFailure)
