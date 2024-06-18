@@ -59,4 +59,42 @@ public static class ResultExtensions
         success => success.Map(v => v),
         failure => failure
     );
+
+    public static Result<(T1, T2)> Combine<T1, T2>(
+        this (Result<T1>, Result<T2>) tuple
+    ) => tuple.Item1.Map(
+        one => tuple.Item2.Map(two => (one, two))
+    );
+
+    public static Result<(T1, T2, T3)> Combine<T1, T2, T3>(
+        this (Result<T1>, Result<T2>, Result<T3>) tuple
+    ) => tuple.Item1.Map(
+        one => tuple.Item2.Map(
+            two => tuple.Item3.Map(three => (one, two, three))
+        )
+    );
+
+    public static Result<(T1, T2, T3, T4)> Combine<T1, T2, T3, T4>(
+        this (Result<T1>, Result<T2>, Result<T3>, Result<T4>) tuple
+    ) => tuple.Item1.Map(
+        one => tuple.Item2.Map(
+            two => tuple.Item3.Map(
+                three => tuple.Item4.Map(four => (one, two, three, four)
+                )
+            )
+        )
+    );
+
+    public static Result<(T1, T2, T3, T4, T5)> Combine<T1, T2, T3, T4, T5>(
+        this (Result<T1>, Result<T2>, Result<T3>, Result<T4>, Result<T5>) tuple
+    ) => tuple.Item1.Map(
+        one => tuple.Item2.Map(
+            two => tuple.Item3.Map(
+                three => tuple.Item4.Map(
+                    four => tuple.Item5.Map(five => (one, two, three, four, five)
+                    )
+                )
+            )
+        )
+    );
 }
