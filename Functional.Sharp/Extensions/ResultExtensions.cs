@@ -30,6 +30,19 @@ public static class ResultExtensions
             failure
         );
     }
+    
+    public static async Task<Result<TNext>> MatchAsync<TValue, TNext>(
+        this Task<Result<TValue>> task,
+        Func<TValue, TNext> success,
+        Func<Error, TNext> failure)
+    {
+        var result = await task;
+
+        return await result.MatchAsync(
+            value => Task.FromResult(success(value)),
+            failure
+        );
+    }
 
     public static async Task<Result<TValue>> OnSuccessAsync<TValue>(
         this Task<Result<TValue>> task,
