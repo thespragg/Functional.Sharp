@@ -27,6 +27,8 @@ public readonly struct Maybe<T>
     public T OrElse(T defaultValue)
         => HasValue ? _value! : defaultValue;
 
+    public T? Unwrap() => _value;
+    
     public TResult Match<TResult>(
         Func<T, TResult> hasValue,
         Func<TResult> hasNone
