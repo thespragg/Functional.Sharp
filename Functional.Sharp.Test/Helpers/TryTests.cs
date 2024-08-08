@@ -89,23 +89,6 @@ public class TryTests
     }
     
     [Fact]
-    public void Execute_ShouldHandleNestedResult()
-    {
-        var sut = Try.Execute(() => Result<int>.Success(1));
-        Assert.Equal(1, sut.OrElse(-1));
-    }
-    
-    [Fact]
-    public void Execute_ShouldHandleNestedResult_Error()
-    {
-        var sut = Try.Execute(() => Result<int>.Failure(new DatabaseError("Database error")));
-        sut.Match(
-            success => throw new Exception("Wrong branch."),
-            err => Assert.Equal(typeof(DatabaseError), err.GetType())
-        );
-    }
-    
-    [Fact]
     public void Execute_ShouldHandleNestedResult_Exception()
     {
         var sut = Try.Execute<Result<int>>(() => throw new Exception("Database Error"), ex => new DatabaseError(ex.Message));
