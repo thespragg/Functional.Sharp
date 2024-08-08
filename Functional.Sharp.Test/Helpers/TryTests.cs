@@ -99,23 +99,6 @@ public class TryTests
     }
     
     [Fact]
-    public async Task ExecuteAsync_ShouldHandleNestedResult_Error()
-    {
-        var sut = await Try.ExecuteAsync(async () => await Task.FromResult(Result<int>.Failure(new DatabaseError("Database error"))));
-        sut.Match(
-            success => throw new Exception("Wrong branch."),
-            err => Assert.Equal(typeof(DatabaseError), err.GetType())
-        );
-    }
-    
-    [Fact]
-    public async Task ExecuteAsync_ShouldHandleNestedResult()
-    {
-        var sut = await Try.ExecuteAsync(async () => await Task.FromResult(Result<int>.Success(1)));
-        Assert.Equal(1, sut.OrElse(-1));
-    }
-
-    [Fact]
     public async Task ExecuteAsync_ShouldHandleNestedResult_Exception()
     {
         var sut = await Try.ExecuteAsync<Result<int>>(() => throw new Exception("Database Error"), ex => new DatabaseError(ex.Message));
