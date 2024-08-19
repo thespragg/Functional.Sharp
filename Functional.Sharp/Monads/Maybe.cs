@@ -1,3 +1,4 @@
+using Functional.Sharp.Errors;
 using JetBrains.Annotations;
 
 namespace Functional.Sharp.Monads;
@@ -70,4 +71,28 @@ public readonly struct Maybe<T>
 
     public static implicit operator Maybe<T>(T? value)
         => value is not null ? Of(value) : None;
+    
+    public async Task<Maybe<T>> OnSuccessAsync(Func<T, Task> func)
+    {
+        if (HasValue) await func(_value!);
+        return this;
+    }
+
+    public Result<Maybe<T>> OnSuccess(Action<T> func)
+    {
+        if (HasValue) func(_value!);
+        return this;
+    }
+
+    public async Task<Maybe<T>> OnFailureAsync(Func<Task> func)
+    {
+        if (!HasValue) await func();
+        return this;
+    }
+
+    public Maybe<T> OnFailure(Action func)
+    {
+        if (!HasValue) func();
+        return this;
+    }
 }
