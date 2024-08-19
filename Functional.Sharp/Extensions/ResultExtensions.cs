@@ -5,6 +5,30 @@ namespace Functional.Sharp.Extensions;
 
 public static class ResultExtensions
 {
+    public static IEnumerable<T> StripFailures<T>(this IEnumerable<Result<T>> results)
+    {
+        var res = new List<T>();
+        foreach (var result in results)
+        {
+            result.OnSuccess(val => res.Add(val));
+        }
+
+        return res;
+    }
+
+    public static Result<IEnumerable<T>> ToSingleResult<T>(this IEnumerable<Result<T>> results)
+    {
+        var res = new List<T>();
+        foreach (var result in results)
+        {
+            var (s, e) = result.Match<(T?, Error?)>(val => (val, null), err => (default, err));
+            if (s is not null) res.Add(s);
+            else return e!;
+        }
+
+        return res;
+    }
+
     public static async Task<Result<TNext>> MapAsync<TValue, TNext>(
         this Task<Result<TValue>> task,
         Func<TValue, Task<TNext>> next)
@@ -30,7 +54,7 @@ public static class ResultExtensions
             failure
         );
     }
-    
+
     public static async Task<Result<TNext>> MatchAsync<TValue, TNext>(
         this Task<Result<TValue>> task,
         Func<TValue, TNext> success,
