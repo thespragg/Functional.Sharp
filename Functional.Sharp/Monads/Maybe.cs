@@ -78,7 +78,7 @@ public readonly struct Maybe<T>
         return this;
     }
 
-    public Result<Maybe<T>> OnSuccess(Action<T> func)
+    public Maybe<T> OnSuccess(Action<T> func)
     {
         if (HasValue) func(_value!);
         return this;
