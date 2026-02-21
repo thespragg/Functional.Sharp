@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 namespace Functional.Sharp.Monads;
 
 [PublicAPI]
-public class Result<TValue>
+public class Result<TValue> : IResult<Result<TValue>>
 {
     private readonly TValue? _value;
     private readonly bool _isSuccess;
@@ -31,6 +31,11 @@ public class Result<TValue>
         Func<TValue, Task<T>> success,
         Func<Error, T> error
     ) => _isSuccess ? await success(_value!) : error(_error!);
+
+    public async Task<T> MatchAsync<T>(
+        Func<TValue, Task<T>> success,
+        Func<Error, Task<T>> error
+    ) => _isSuccess ? await success(_value!) : await error(_error!);
     
     public void Match(
         Action<TValue> success,

@@ -25,6 +25,12 @@ public readonly struct Maybe<T>
             ? Maybe<TResult>.None
             : await mapper(_value);
 
+    public Maybe<TResult> Map<TResult>(Func<T, Maybe<TResult>> mapper)
+        => _value is null ? Maybe<TResult>.None : mapper(_value);
+
+    public async Task<Maybe<TResult>> MapAsync<TResult>(Func<T, Task<Maybe<TResult>>> mapper)
+        => _value is null ? Maybe<TResult>.None : await mapper(_value);
+
     public T OrElse(T defaultValue)
         => HasValue ? _value! : defaultValue;
 
@@ -40,9 +46,19 @@ public readonly struct Maybe<T>
     public async Task<TResult> MatchAsync<TResult>(
         Func<T, Task<TResult>> hasValue,
         Func<TResult> hasNone
-    ) => HasValue 
-        ? await hasValue(_value!) 
+    ) => HasValue
+        ? await hasValue(_value!)
         : hasNone();
+
+    public async Task<TResult> MatchAsync<TResult>(
+        Func<T, Task<TResult>> hasValue,
+        Func<Task<TResult>> hasNone
+    ) => HasValue
+        ? await hasValue(_value!)
+        : await hasNone();
+
+    public Result<T> ToResult(Error error)
+        => HasValue ? Result<T>.Success(_value!) : Result<T>.Failure(error);
 
     public static Maybe<T> None
         => new(default, false);
