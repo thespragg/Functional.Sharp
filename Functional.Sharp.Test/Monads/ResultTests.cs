@@ -136,4 +136,102 @@ public class ResultTests
             err => Assert.Equal(typeof(DatabaseError), err.GetType())
         );
     }
+
+    [Fact]
+    public void FlatMap_ReturnsFlatSuccessResult()
+    {
+        Result<int> result = 1;
+        var sut = result.FlatMap(Result<int>.Success);
+        Assert.Equal(1, sut.OrElse(-1));
+    }
+
+    [Fact]
+    public void FlatMap_ReturnsFlatFailureResult()
+    {
+        Result<int> result = 1;
+        var sut = result.FlatMap(x => Result<int>.Failure(new DatabaseError("Database error")));
+        sut.Match(
+            success => throw new Exception("Wrong branch."),
+            err => Assert.Equal(typeof(DatabaseError), err.GetType())
+        );
+    }
+
+    [Fact]
+    public void FlatMap_PropagatesFailure()
+    {
+        Result<int> result = new Error("Failed");
+        var sut = result.FlatMap(Result<int>.Success);
+        sut.Match(
+            success => throw new Exception("Wrong branch."),
+            err => Assert.Equal("Failed", err.Message)
+        );
+    }
+
+    [Fact]
+    public async Task FlatMapAsync_ReturnsFlatSuccessResult()
+    {
+        Result<int> result = 1;
+        var sut = await result.FlatMapAsync(x => Task.FromResult(Result<int>.Success(x)));
+        Assert.Equal(1, sut.OrElse(-1));
+    }
+
+    [Fact]
+    public async Task FlatMapAsync_ReturnsFlatFailureResult()
+    {
+        Result<int> result = 1;
+        var sut = await result.FlatMapAsync(x => Task.FromResult(Result<int>.Failure(new DatabaseError("Database error"))));
+        sut.Match(
+            success => throw new Exception("Wrong branch."),
+            err => Assert.Equal(typeof(DatabaseError), err.GetType())
+        );
+    }
+
+    [Fact]
+    public async Task FlatMapAsync_PropagatesFailure()
+    {
+        Result<int> result = new Error("Failed");
+        var sut = await result.FlatMapAsync(x => Task.FromResult(Result<int>.Success(x)));
+        sut.Match(
+            success => throw new Exception("Wrong branch."),
+            err => Assert.Equal("Failed", err.Message)
+        );
+    }
+
+    [Fact]
+    public async Task TaskFlatMapAsync_WithSyncMapper_ReturnsFlatSuccessResult()
+    {
+        Task<Result<int>> task = Task.FromResult(Result<int>.Success(1));
+        var sut = await task.FlatMapAsync(Result<int>.Success);
+        Assert.Equal(1, sut.OrElse(-1));
+    }
+
+    [Fact]
+    public async Task TaskFlatMapAsync_WithSyncMapper_PropagatesFailure()
+    {
+        Task<Result<int>> task = Task.FromResult(Result<int>.Failure(new Error("Failed")));
+        var sut = await task.FlatMapAsync(Result<int>.Success);
+        sut.Match(
+            success => throw new Exception("Wrong branch."),
+            err => Assert.Equal("Failed", err.Message)
+        );
+    }
+
+    [Fact]
+    public async Task TaskFlatMapAsync_WithAsyncMapper_ReturnsFlatSuccessResult()
+    {
+        Task<Result<int>> task = Task.FromResult(Result<int>.Success(1));
+        var sut = await task.FlatMapAsync(x => Task.FromResult(Result<int>.Success(x)));
+        Assert.Equal(1, sut.OrElse(-1));
+    }
+
+    [Fact]
+    public async Task TaskFlatMapAsync_WithAsyncMapper_PropagatesFailure()
+    {
+        Task<Result<int>> task = Task.FromResult(Result<int>.Failure(new Error("Failed")));
+        var sut = await task.FlatMapAsync(x => Task.FromResult(Result<int>.Success(x)));
+        sut.Match(
+            success => throw new Exception("Wrong branch."),
+            err => Assert.Equal("Failed", err.Message)
+        );
+    }
 }

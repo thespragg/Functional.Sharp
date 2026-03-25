@@ -117,6 +117,22 @@ public static class ResultExtensions
         return result.OnFailure(onFailure);
     }
 
+    public static async Task<Result<TNext>> FlatMapAsync<TValue, TNext>(
+        this Task<Result<TValue>> task,
+        Func<TValue, Result<TNext>> next)
+    {
+        var result = await task;
+        return result.FlatMap(next);
+    }
+
+    public static async Task<Result<TNext>> FlatMapAsync<TValue, TNext>(
+        this Task<Result<TValue>> task,
+        Func<TValue, Task<Result<TNext>>> next)
+    {
+        var result = await task;
+        return await result.FlatMapAsync(next);
+    }
+
     public static Result<T> Flatten<T>(this Result<Result<T>> result)
         => result.Match(
             success => success.Map(v => v),

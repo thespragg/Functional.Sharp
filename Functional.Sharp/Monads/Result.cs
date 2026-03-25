@@ -98,6 +98,12 @@ public class Result<TValue> : IResult<Result<TValue>>
             ? (await mapper(_value!)).Match<Result<T>>(success => success, err => err)
             : _error!;
 
+    public Result<T> FlatMap<T>(Func<TValue, Result<T>> mapper)
+        => Map(mapper);
+
+    public Task<Result<T>> FlatMapAsync<T>(Func<TValue, Task<Result<T>>> mapper)
+        => MapAsync(mapper);
+
     public static implicit operator Result<TValue>(TValue value)
         => new(value);
 
